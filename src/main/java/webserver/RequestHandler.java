@@ -72,6 +72,7 @@ public class RequestHandler extends Thread {
     }
 
     private byte[] readHtmlFile(String htmlFileName) throws IOException {
-        return Files.readAllBytes(new File("C:\\Users\\mr02-06\\IdeaProjects\\webserver_nextstep\\src\\main\\resources\\static\\" + htmlFileName).toPath());
+
+        return Files.readAllBytes(new File("./src/main/resources/static/" + htmlFileName).toPath());
     }
 }
