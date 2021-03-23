@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 public class RequestHandler extends Thread {
 
@@ -23,9 +25,11 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream();
              OutputStream out = connection.getOutputStream()) {
+
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            byte[] body = createResponseBody(br.readLine());
+
             DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World".getBytes();
             response200Header(dos, body.length);
             responseBody(dos, body);
         } catch (IOException e) {
@@ -52,5 +56,22 @@ public class RequestHandler extends Thread {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private byte[] createResponseBody(String url) throws IOException {
+        url = splitUrl(url);
+        if (url.equals("/")) {
+            return "Hello World".getBytes(StandardCharsets.UTF_8);
+        }
+        return readHtmlFile(url);
+
+    }
+
+    private String splitUrl(String url) {
+        return url.split(" ")[1];
+    }
+
+    private byte[] readHtmlFile(String htmlFileName) throws IOException {
+        return Files.readAllBytes(new File("C:\\Users\\mr02-06\\IdeaProjects\\webserver_nextstep\\src\\main\\resources\\static\\" + htmlFileName).toPath());
     }
 }
