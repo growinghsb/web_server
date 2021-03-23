@@ -4,6 +4,7 @@ import database.UserDB;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.Utils;
 
 import java.io.*;
 import java.net.Socket;
@@ -60,17 +61,13 @@ public class RequestHandler extends Thread {
     }
 
     private byte[] createResponseBody(BufferedReader url) throws IOException {
-        String htmlFileName = parameterExtraction(splitRequestUrl(url));
+        String htmlFileName = parameterExtraction(Utils.getHtmlFileName(url));
 
         if (htmlFileName.equals("/")) {
             return readHtmlFile("index");
         }
 
         return readHtmlFile(htmlFileName);
-    }
-
-    private String splitRequestUrl(BufferedReader url) throws IOException {
-        return url.readLine().split(" ")[1];
     }
 
     private String parameterExtraction(String requestUrl) {
