@@ -5,6 +5,7 @@ import jdk.jshell.execution.Util;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.Response;
 import util.Utils;
 
 import java.io.*;
@@ -30,33 +31,7 @@ public class RequestHandler extends Thread {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
              OutputStream out = connection.getOutputStream()) {
 
-            createResponse(new DataOutputStream(out), createResponseBody(in));
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void createResponse(DataOutputStream dos, byte[] body) {
-        response200Header(dos, body.length);
-        responseBody(dos, body);
-    }
-
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
-        try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Content-Length:" + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void responseBody(DataOutputStream dos, byte[] body) {
-        try {
-            dos.write(body, 0, body.length);
-            dos.writeBytes("\r\n");
-            dos.flush();
+            Response.createResponse(new DataOutputStream(out), createResponseBody(in));
         } catch (IOException e) {
             log.error(e.getMessage());
         }
@@ -68,7 +43,6 @@ public class RequestHandler extends Thread {
         if (htmlFileName.equals("/")) {
             return Utils.getHtmlFilePath("index");
         }
-
         return Utils.getHtmlFilePath(htmlFileName);
     }
 
