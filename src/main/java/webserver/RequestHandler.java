@@ -27,7 +27,7 @@ public class RequestHandler extends Thread {
              OutputStream out = connection.getOutputStream()) {
 
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            byte[] body = createResponseBody(br.readLine());
+            byte[] body = createResponseBody(br);
 
             DataOutputStream dos = new DataOutputStream(out);
             response200Header(dos, body.length);
@@ -58,12 +58,18 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private byte[] createResponseBody(String url) throws IOException {
-        url = splitUrl(url);
-        if (url.equals("/")) {
-            return "Hello World".getBytes(StandardCharsets.UTF_8);
+    private byte[] createResponseBody(BufferedReader url) throws IOException {
+        String htmlFileUrl = splitUrl(url.readLine());
+        System.out.println(htmlFileUrl + "첫 줄");
+        while (url.ready()) {
+            System.out.println(url.readLine());
         }
-        return readHtmlFile(url);
+
+        if (htmlFileUrl.equals("/")) {
+            return readHtmlFile("index");
+        }
+
+        return readHtmlFile(htmlFileUrl);
 
     }
 
@@ -72,7 +78,9 @@ public class RequestHandler extends Thread {
     }
 
     private byte[] readHtmlFile(String htmlFileName) throws IOException {
-
-        return Files.readAllBytes(new File("./src/main/resources/static/" + htmlFileName).toPath());
+        if (htmlFileName.contains("?")) {
+            htmlFileName = htmlFileName.replace("?", "");
+        }
+        return Files.readAllBytes(new File("./src/main/resources/static/" + htmlFileName + ".html").toPath());
     }
 }
