@@ -1,5 +1,7 @@
 package webserver;
 
+import database.UserDB;
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +25,10 @@ public class RequestHandler extends Thread {
         log.debug("New Client Connect! Connected IP : {}, Port {}",
                 connection.getInetAddress(), connection.getPort());
 
-        try (InputStream in = connection.getInputStream();
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
              OutputStream out = connection.getOutputStream()) {
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            byte[] body = createResponseBody(br);
+            byte[] body = createResponseBody(in);
 
             DataOutputStream dos = new DataOutputStream(out);
             response200Header(dos, body.length);
@@ -59,28 +60,48 @@ public class RequestHandler extends Thread {
     }
 
     private byte[] createResponseBody(BufferedReader url) throws IOException {
-        String htmlFileUrl = splitUrl(url.readLine());
-        System.out.println(htmlFileUrl + "첫 줄");
-        while (url.ready()) {
-            System.out.println(url.readLine());
-        }
+        String htmlFileName = parameterExtraction(splitRequestUrl(url));
 
-        if (htmlFileUrl.equals("/")) {
+        if (htmlFileName.equals("/")) {
             return readHtmlFile("index");
         }
 
-        return readHtmlFile(htmlFileUrl);
-
+        return readHtmlFile(htmlFileName);
     }
 
-    private String splitUrl(String url) {
-        return url.split(" ")[1];
+    private String splitRequestUrl(BufferedReader url) throws IOException {
+        return url.readLine().split(" ")[1];
+    }
+
+    private String parameterExtraction(String requestUrl) {
+        if (requestUrl.contains("?")) {
+            String[] token = requestUrl.replace("?", " ").split(" ");
+            userSave(token[token.length - 1]);
+            requestUrl = token[0];
+        }
+
+        return requestUrl;
     }
 
     private byte[] readHtmlFile(String htmlFileName) throws IOException {
         if (htmlFileName.contains("?")) {
             htmlFileName = htmlFileName.replace("?", "");
         }
+
         return Files.readAllBytes(new File("./src/main/resources/static/" + htmlFileName + ".html").toPath());
+    }
+
+    private void userSave(String userParameter) {
+        if (!userParameter.contains("/")) {
+            String[] userInfo = userParameter.split("&");
+            String[] userValue = new String[userInfo.length];
+
+            for (int i = 0; i < userValue.length; i++) {
+                userValue[i] = userInfo[i].split("=")[1];
+            }
+
+            User user = new User(userValue[0], userValue[1], userValue[2], userValue[3]);
+            UserDB.insertUser(user);
+        }
     }
 }
