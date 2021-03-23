@@ -1,6 +1,7 @@
 package webserver;
 
 import database.UserDB;
+import jdk.jshell.execution.Util;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +30,15 @@ public class RequestHandler extends Thread {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
              OutputStream out = connection.getOutputStream()) {
 
-            byte[] body = createResponseBody(in);
-
-            DataOutputStream dos = new DataOutputStream(out);
-            response200Header(dos, body.length);
-            responseBody(dos, body);
+            createResponse(new DataOutputStream(out), createResponseBody(in));
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private void createResponse(DataOutputStream dos, byte[] body) {
+        response200Header(dos, body.length);
+        responseBody(dos, body);
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
@@ -64,10 +66,10 @@ public class RequestHandler extends Thread {
         String htmlFileName = parameterExtraction(Utils.getHtmlFileName(url));
 
         if (htmlFileName.equals("/")) {
-            return readHtmlFile("index");
+            return Utils.getHtmlFilePath("index");
         }
 
-        return readHtmlFile(htmlFileName);
+        return Utils.getHtmlFilePath(htmlFileName);
     }
 
     private String parameterExtraction(String requestUrl) {
@@ -80,14 +82,6 @@ public class RequestHandler extends Thread {
         return requestUrl;
     }
 
-    private byte[] readHtmlFile(String htmlFileName) throws IOException {
-        if (htmlFileName.contains("?")) {
-            htmlFileName = htmlFileName.replace("?", "");
-        }
-
-        return Files.readAllBytes(new File("./src/main/resources/static/" + htmlFileName + ".html").toPath());
-    }
-
     private void userSave(String userParameter) {
         if (!userParameter.contains("/")) {
             String[] userInfo = userParameter.split("&");
@@ -97,8 +91,7 @@ public class RequestHandler extends Thread {
                 userValue[i] = userInfo[i].split("=")[1];
             }
 
-            User user = new User(userValue[0], userValue[1], userValue[2], userValue[3]);
-            UserDB.insertUser(user);
+            UserDB.insertUser(new User(userValue[0], userValue[1], userValue[2], userValue[3]));
         }
     }
 }
