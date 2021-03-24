@@ -28,7 +28,10 @@ public class RequestHandler extends Thread {
         log.debug("New Client Connect! Connected IP : {}, Port {}",
                 connection.getInetAddress(), connection.getPort());
 
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+        try (BufferedReader in =
+                     new BufferedReader(
+                             new InputStreamReader(connection.getInputStream(),
+                                     StandardCharsets.UTF_8));
              OutputStream out = connection.getOutputStream()) {
 
             Response.createResponse(new DataOutputStream(out), createResponseBody(in));
