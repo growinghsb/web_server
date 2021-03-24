@@ -26,6 +26,7 @@ public class Response {
         }
     }
 
+
     private static void responseBody(DataOutputStream dos, byte[] body) {
         try {
             dos.write(body, 0, body.length);

@@ -12,6 +12,8 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RequestHandler extends Thread {
 
@@ -34,41 +36,47 @@ public class RequestHandler extends Thread {
                                      StandardCharsets.UTF_8));
              OutputStream out = connection.getOutputStream()) {
 
-            Response.createResponse(new DataOutputStream(out), createResponseBody(in));
+            Response.createResponse(new DataOutputStream(out), requestHandler(in));
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    private byte[] createResponseBody(BufferedReader url) throws IOException {
-        String htmlFileName = parameterExtraction(Utils.getHtmlFileName(url));
+    private byte[] requestHandler(BufferedReader url) throws IOException {
+        String[] requestMessages = Utils.getRequestHttpHeaderMessages(url);
 
-        if (htmlFileName.equals("/")) {
-            return Utils.getHtmlFilePath("index");
+        if (requestMessages[0].equals("GET")) {
+            return requestGET(requestMessages);
         }
-        return Utils.getHtmlFilePath(htmlFileName);
+
+        if (requestMessages[0].equals("POST")) {
+            return requestPOST(requestMessages, url);
+        }
+        return null;
     }
 
-    private String parameterExtraction(String requestUrl) {
-        if (requestUrl.contains("?")) {
-            String[] token = requestUrl.replace("?", " ").split(" ");
-            userSave(token[token.length - 1]);
-            requestUrl = token[0];
-        }
+    private byte[] requestGET(String[] requestMessage) throws IOException {
+        return Utils.getHtmlFilePath(requestMessage[1]);
+    }
 
-        return requestUrl;
+    private byte[] requestPOST(String[] requestMessage, BufferedReader resource) throws IOException {
+        getRequestHttpBody(resource);
+        return Utils.getHtmlFilePath(requestMessage[1]);
+    }
+
+    private void getRequestHttpBody(BufferedReader resource) throws IOException {
+        userSave(Utils.getHttpBodyContent(resource));
     }
 
     private void userSave(String userParameter) {
-        if (!userParameter.contains("/")) {
-            String[] userInfo = userParameter.split("&");
-            String[] userValue = new String[userInfo.length];
 
-            for (int i = 0; i < userValue.length; i++) {
-                userValue[i] = userInfo[i].split("=")[1];
-            }
+        String[] userInfos = userParameter.split("&");
+        String[] userValues = new String[userInfos.length];
 
-            UserDB.insertUser(new User(userValue[0], userValue[1], userValue[2], userValue[3]));
+        for (int i = 0; i < userValues.length; i++) {
+            userValues[i] = userInfos[i].split("=")[1];
         }
+
+        UserDB.insertUser(User.createUser(userValues));
     }
 }

@@ -2,15 +2,17 @@ package database;
 
 import model.User;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDB {
 
-    private static Map<String, User> users = new HashMap<>();
+    private static List<User> users = new ArrayList<>();
+
+    private UserDB() {}
 
     public static void insertUser(User user) {
-        users.put(user.getId(), user);
+        users.add(user);
     }
 
     public static int usersCount() {
