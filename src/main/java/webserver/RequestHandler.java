@@ -65,7 +65,6 @@ public class RequestHandler extends Thread {
         userSave(Utils.getHttpBodyContent(resource));
     }
 
-
     private void userSave(String userParameter) {
 
         String[] userInfos = userParameter.split("&");

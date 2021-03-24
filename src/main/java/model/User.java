@@ -6,7 +6,8 @@ public class User {
     private String name;
     private String email;
 
-    private User(){}
+    private User() {
+    }
 
     private User(String id, String password, String name, String email) {
         this.id = id;
@@ -37,5 +38,4 @@ public class User {
     public static User createUser(String[] parameters) {
         return new User(parameters[0], parameters[1], parameters[2], parameters[3]);
     }
-
 }

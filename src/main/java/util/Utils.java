@@ -35,7 +35,7 @@ public class Utils {
     }
 
     public static String getHttpBodyContent(BufferedReader httpHeader) throws IOException {
-        return getContent( getContentLength(httpHeader), httpHeader);
+        return getContent(getContentLength(httpHeader), httpHeader);
 
     }
 
