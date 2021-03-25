@@ -1,7 +1,6 @@
 package webserver;
 
 import database.UserDB;
-import jdk.jshell.execution.Util;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +10,6 @@ import util.Utils;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 
 public class RequestHandler extends Thread {
 
@@ -55,14 +51,17 @@ public class RequestHandler extends Thread {
         return null;
     }
 
-    private byte[] requestGET(String[] requestMessage) throws IOException {
-        return Utils.getHtmlFilePath(requestMessage[1]);
+    private byte[] requestGET(String[] requestMessages) throws IOException {
+        return getFilePath(requestMessages);
     }
 
-    private byte[] requestPOST(String[] requestMessage, BufferedReader resource) throws IOException {
-
+    private byte[] requestPOST(String[] requestMessages, BufferedReader resource) throws IOException {
         getRequestHttpBody(resource);
-        return Utils.getHtmlFilePath(requestMessage[1]);
+        return getFilePath(requestMessages);
+    }
+
+    private byte[] getFilePath(String[] requestMessages) throws IOException{
+        return Utils.getHtmlFilePath(requestMessages[1]);
     }
 
     private void getRequestHttpBody(BufferedReader resource) throws IOException {
