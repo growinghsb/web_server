@@ -4,7 +4,9 @@ import database.UserDB;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.Login;
 import util.Response;
+import util.Sign;
 import util.Utils;
 
 import java.io.*;
@@ -42,41 +44,48 @@ public class RequestHandler extends Thread {
         String[] requestMessages = Utils.getRequestHttpHeaderMessages(url);
 
         if (requestMessages[0].equals("GET")) {
-            return requestGET(requestMessages);
+            return requestGET(requestMessages[1]);
         }
 
         if (requestMessages[0].equals("POST")) {
-            return requestPOST(requestMessages, url);
+            return requestPOST(requestMessages[1], url);
         }
         return null;
     }
 
-    private byte[] requestGET(String[] requestMessages) throws IOException {
-        return getFilePath(requestMessages);
+    private byte[] requestGET(String requestUrl) throws IOException {
+        return getFilePath(requestUrl);
     }
 
-    private byte[] requestPOST(String[] requestMessages, BufferedReader resource) throws IOException {
-        getRequestHttpBody(resource);
-        return getFilePath(requestMessages);
-    }
+    private byte[] requestPOST(String requestUrl, BufferedReader resource) throws IOException {
+        String responseUrl = requestUrl;
 
-    private byte[] getFilePath(String[] requestMessages) throws IOException{
-        return Utils.getHtmlFilePath(requestMessages[1]);
-    }
-
-    private void getRequestHttpBody(BufferedReader resource) throws IOException {
-        userSave(Utils.getHttpBodyContent(resource));
-    }
-
-    private void userSave(String userParameter) {
-
-        String[] userInfos = userParameter.split("&");
-        String[] userValues = new String[userInfos.length];
-
-        for (int i = 0; i < userValues.length; i++) {
-            userValues[i] = userInfos[i].split("=")[1];
+        if (isSign(requestUrl)) {
+            Sign.sign(getBodyContent(resource));
+            responseUrl = "login";
         }
 
-        UserDB.insertUser(User.createUser(userValues));
+        if (isLogin(requestUrl)) {
+            Login.login(getBodyContent(resource));
+            responseUrl = "index";
+        }
+
+        return getFilePath(responseUrl);
+    }
+
+    private byte[] getFilePath(String requestUrl) throws IOException {
+        return Utils.getHtmlFilePath(requestUrl);
+    }
+
+    private String getBodyContent(BufferedReader resource) throws IOException {
+        return Utils.getHttpBodyContent(resource);
+    }
+
+    private boolean isLogin(String requestUrl) {
+        return requestUrl.contains("login");
+    }
+
+    private boolean isSign(String requestUrl) {
+        return requestUrl.contains("sign");
     }
 }
