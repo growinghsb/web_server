@@ -60,6 +60,7 @@ public class RequestHandler extends Thread {
     }
 
     private byte[] requestPOST(String[] requestMessage, BufferedReader resource) throws IOException {
+
         getRequestHttpBody(resource);
         return Utils.getHtmlFilePath(requestMessage[1]);
     }
