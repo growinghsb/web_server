@@ -8,6 +8,8 @@ import java.io.IOException;
 
 public class Response {
 
+    private static boolean isCookie = false;
+
     private static final Logger log = LoggerFactory.getLogger(Response.class);
 
     public static void createResponse(DataOutputStream dos, byte[] body) {
@@ -20,12 +22,12 @@ public class Response {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length:" + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("Set-Cookie: " + "login=" +isCookie + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
-
 
     private static void responseBody(DataOutputStream dos, byte[] body) {
         try {
@@ -35,5 +37,9 @@ public class Response {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    public static void setIsCookie(boolean loginSuccess) {
+        isCookie = loginSuccess;
     }
 }

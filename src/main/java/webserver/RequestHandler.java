@@ -58,19 +58,21 @@ public class RequestHandler extends Thread {
     }
 
     private byte[] requestPOST(String requestUrl, BufferedReader resource) throws IOException {
-        String responseUrl = requestUrl;
 
         if (isSign(requestUrl)) {
             Sign.sign(getBodyContent(resource));
-            responseUrl = "login";
+            return getFilePath("user/login");
         }
 
         if (isLogin(requestUrl)) {
-            Login.login(getBodyContent(resource));
-            responseUrl = "index";
+            if (Login.login(getBodyContent(resource))) {
+                Response.setIsCookie(true);
+                return getFilePath("/");
+            }
+            Response.setIsCookie(false);
+            return getFilePath("user/login");
         }
-
-        return getFilePath(responseUrl);
+        return getFilePath(requestUrl);
     }
 
     private byte[] getFilePath(String requestUrl) throws IOException {
@@ -82,10 +84,10 @@ public class RequestHandler extends Thread {
     }
 
     private boolean isLogin(String requestUrl) {
-        return requestUrl.contains("login");
+        return requestUrl.contains("/");
     }
 
     private boolean isSign(String requestUrl) {
-        return requestUrl.contains("sign");
+        return requestUrl.contains("login");
     }
 }

@@ -4,11 +4,11 @@ import database.UserDB;
 
 public class Login {
 
-    public static void login(String loginParameter) {
-        getParameter(loginParameter);
+    public static boolean login(String loginParameter) {
+        return getParameter(loginParameter);
     }
 
-    private static void getParameter(String loginParameter) {
+    private static boolean getParameter(String loginParameter) {
 
         String[] userInfos = loginParameter.split("&");
         String[] userValues = new String[userInfos.length];
@@ -17,6 +17,6 @@ public class Login {
             userValues[i] = userInfos[i].split("=")[1];
         }
 
-        UserDB.checkLogin(userValues[0], userValues[1]);
+        return UserDB.checkLogin(userValues[0], userValues[1]);
     }
 }
