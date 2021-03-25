@@ -1,7 +1,6 @@
 package webserver;
 
 import database.UserDB;
-import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.Login;
@@ -44,7 +43,7 @@ public class RequestHandler extends Thread {
         String[] requestMessages = Utils.getRequestHttpHeaderMessages(url);
 
         if (requestMessages[0].equals("GET")) {
-            return requestGET(requestMessages[1]);
+            return requestGET(requestMessages[1], url);
         }
 
         if (requestMessages[0].equals("POST")) {
@@ -53,8 +52,19 @@ public class RequestHandler extends Thread {
         return null;
     }
 
-    private byte[] requestGET(String requestUrl) throws IOException {
+    private byte[] requestGET(String requestUrl, BufferedReader httpRequest) throws IOException {
+        if (requestUrl.contains("user/userList")) {
+            if (isLogin(httpRequest)) {
+                UserDB.getUsers();
+                return getFilePath(requestUrl);
+            }
+            return getFilePath("user/login");
+        }
         return getFilePath(requestUrl);
+    }
+
+    private boolean isLogin(BufferedReader httpRequest) throws IOException {
+        return Utils.getCookieValue(httpRequest).contains("true");
     }
 
     private byte[] requestPOST(String requestUrl, BufferedReader resource) throws IOException {

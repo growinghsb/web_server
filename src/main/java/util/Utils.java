@@ -39,15 +39,32 @@ public class Utils {
 
     }
 
-    private static int getContentLength(BufferedReader httpHeader) throws IOException {
+    private static int getContentLength(BufferedReader httpRequestMessage) throws IOException {
+        String requestHeaderMessage = "";
+
         String contentLength = "";
+        while (httpRequestMessage.ready()) {
+            requestHeaderMessage = httpRequestMessage.readLine();
+
+            if (requestHeaderMessage.contains("Content-Length:")) {
+                contentLength = requestHeaderMessage;
+                break;
+            }
+
+        }
+        return Integer.parseInt(contentLength.split(" ")[1]);
+    }
+
+    public static String getCookieValue(BufferedReader httpHeader) throws IOException {
+        String cookie = "";
         while (httpHeader.ready()) {
-            contentLength = httpHeader.readLine();
-            if (contentLength.contains("Content-Length:")) {
+            cookie = httpHeader.readLine();
+            if (cookie.contains("Cookie:")) {
                 break;
             }
         }
-        return Integer.parseInt(contentLength.split(" ")[1]);
+
+        return cookie;
     }
 
     private static String getContent(int contentLength, BufferedReader httpHeader) throws IOException {

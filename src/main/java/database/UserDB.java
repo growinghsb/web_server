@@ -12,6 +12,16 @@ public class UserDB {
     private UserDB() {
     }
 
+    public static StringBuilder getUsers() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<h3>");
+        for (User user : users) {
+            sb.append("유저ID : " + user.getId()).append(" | 유저이름 : " + user.getName()).append(" | 이메일 : " + user.getEmail());
+        }
+        sb.append("</h3>");
+        return sb;
+    }
+
     public static void insertUser(User user) {
         users.add(user);
     }
@@ -37,9 +47,5 @@ public class UserDB {
 
     private static boolean isPassword(String userPassword, String inputPassword) {
         return userPassword.equals(inputPassword);
-    }
-
-    public static int usersCount() {
-        return users.size();
     }
 }
